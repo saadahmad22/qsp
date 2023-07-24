@@ -1,0 +1,186 @@
+.container
+{
+    /* center contents */
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.screen-container {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* colors for navbar */
+.navbar-default .navbar-brand .blue
+{
+    color: #537fbe;
+}
+.navbar-default .navbar-brand .red
+{
+    color: #ea433b;
+}
+.navbar-default .navbar-brand .yellow
+{
+    color: #f5b82e;
+}
+.navbar-default .navbar-brand .green
+{
+    color: #2e944b;
+}
+
+main .form-control
+{
+    /* center form controls */
+    display: inline-block;
+
+    /* override Bootstrap's 100% width for form controls */
+    width: auto;
+}
+
+main img
+{
+    /* constrain images on small screens */
+    max-width: 100%;
+}
+
+main td
+{
+    /* left-align tables' cells */
+    text-align: left;
+}
+
+.table tbody>tr>td.vert-align
+{
+    vertical-align: middle;
+}
+
+.inline_row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    flex-direction: row;
+  }
+
+  .calendar {
+    background-color: #fff;
+    z-index: 1;
+    box-sizing: content-box;
+  }
+
+  th.cal_cell, td.cal_cell {
+    border-style: solid;
+    border-width: 1px;
+    padding: 0;
+    vertical-align: top;
+    border-color: #f9f9f9;
+    height: 6em;
+  }
+
+  .date_container {
+    width: 100%;
+    box-sizing: border-box;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 1em;
+  }
+
+
+  th.cal_cell{
+    text-align: center;
+    height: 2em !important;
+  }
+
+  .day {
+    float: right;
+    width:14.2857142857%
+  }
+
+  tr.cal_row {
+    min-height: 4em;
+    overflow: hidden;
+    border-color: #f9f9f9;
+    border-style: solid;
+    border-width: 0;
+    border-top: 0 hidden transparent;
+    border-left: 0 hidden transparent;
+    border-bottom: 0 hidden transparent;
+    border-right: 0 hidden transparent;
+  }
+
+  .calendar.shadow-sm.p-1 {
+    /* use shadow-sm and padding-1 [all sides and all sizes of screens] bootsrap class in conjunction with the calendar */
+    width: 100%;
+    text-align: left;
+    direction: ltr;
+  }
+
+  .cal_row.inline_row {
+    /* use inline_row class in conjunction with the cal_row */
+    margin-bottom: 1.5em;
+    
+  }
+
+  .cal_button {
+    display: inline-block;
+    font-weight: 400;
+    color: #212529;
+    text-align: center;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.4em 0.65em;
+    font-size: 1em;
+    line-height: 1.5;
+    border-radius: 0.25em;
+  }
+
+  .today_button {
+    background-color: #f67280;
+    border-color: #f67280;
+    color: #fff;
+
+  }
+  .today_button:disabled {
+    opacity: 0.65;
+  }
+
+  .more_panel {
+      margin: 1px 3px;
+      font-size: 0.85em;
+      cursor: pointer;
+      text-decoration: none;
+  }
+
+  a.event, a.event:hover {
+    text-decoration: none !important;
+  }
+
+  .event {
+    margin: 1px 2px 0;
+    padding: 0 1px;
+    background-color: #f67280;
+    color: #fff;
+    font-size: 0.85em;
+    line-height: 1.4;
+    border-radius: 3px;
+    border: 1px solid #f67280;
+  }
+
+     /* Set additional styling options for the columns*/
+.cell_column {
+    float: left;
+    width: 50%;
+}
+
+.cell_row:after {
+    content: "";
+    display: table;
+    clear: both;
+}

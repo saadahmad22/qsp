@@ -1,0 +1,37 @@
+CalendarVO :
+  monthName : str,
+  start_day : int,
+  days : list<DaySchedule>
+
+DaySchedule:
+       "date": 1,
+      "desc": "Regular class",
+      "time": "6:00 ~ 8:00pm"
+
+{
+  "monthName": "",
+  "start_day": "",
+  "days": [
+    {
+      "date": 1,
+      "desc": "Regular class",
+      "time": "6:00 ~ 8:00pm"
+    },
+    {
+      "date": 1,
+      "desc": "Regular class",
+      "time": "6:00 ~ 8:00pm"
+    },
+    {
+      "date": 1,
+      "desc": "Regular class",
+      "time": "6:00 ~ 8:00pm"
+    },
+    {
+      "date": 1,
+      "desc": "Regular class",
+      "time": "6:00 ~ 8:00pm"
+    }
+  ]
+}
+
