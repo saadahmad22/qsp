@@ -20,7 +20,7 @@ class DataBaseHandler(DataBaseManager):
         columns = ""
         values = ""
         questions = ""
-        for key in data.keys():
+        for key in tuple(data.keys())[1:]:
             columns += f'"{key}",'
             questions += "?,"
             values += f'"{str(data[key])}",'
@@ -30,7 +30,7 @@ class DataBaseHandler(DataBaseManager):
             print(f'INSERT INTO {table_name} ({columns[:-1]}) VALUES ({values[:-1]})')
         if self.SHOW_MODEL:
             print(dumps(class_object.__vars__))
-        return_val = self.execute(statement, False, tuple(data.values()))
+        return_val = self.execute(statement, False, tuple(tuple(data.values())[1:]))
         return return_val
 
     def update(self, table_name : str, update_data : dict, operations: list):
@@ -60,16 +60,17 @@ class DataBaseHandler(DataBaseManager):
 
         for operation in operations:
             # check if literal. If it's not, then ? cannot be used
-            if '"' in str(operation.operand_a):
+            class_name = str(model.__class__.__name__).strip().lower()
+            if class_name not in str(operation.operand_a):
                 args.append(operation.operand_a)
                 where_clause += " ? "
             else:
                 where_clause += str(operation.operand_a)
-            if '"' in str(operation.operand_b):
+            if class_name not in str(operation.operand_b):
                 args.append(operation.operand_b)
                 where_clause += f" {operation.operator.value} ? "
             else:
-                where_clause += f' {operation.operator.value} {str(operation.operand_a)} '
+                where_clause += f' {operation.operator.value} {str(operation.operand_b)} '
             if operation.logical_operator:
                 where_clause += str(operation.logical_operator.name)
 

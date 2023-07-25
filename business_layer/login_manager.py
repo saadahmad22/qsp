@@ -70,7 +70,7 @@ def do_login():
     if form.validate_on_submit():
         # query database for username
         try :
-            current_user = read_login_form(form)
+            current_user = fetch_user(form)
         except Exception as error:
             print(error)
             current_user = None
@@ -98,7 +98,7 @@ def do_login():
     else:
         return render_template(login_page, form=form)
     
-def read_login_form(form : LoginForm) -> User:
+def fetch_user(form : LoginForm) -> User:
     '''Returns a list of Users (fetched from the db) from the data retrieved in login_form'''
 
     search_args = Operation("users.email", f'{str(form.email.data)}', RelationalOperator.EQ)
@@ -116,44 +116,33 @@ def do_register():
         needs_to_redo_form = False
 
         # ensure email is unique
-        rows = db.execute("SELECT * FROM users WHERE email = ?", (str(form.data["email"]),))
-        # CHANGE: rows = db.execute("SELECT * FROM users WHERE email = ?", (str(form.data["email"]),))
-        if len(rows) >= 1:
-            flash("The email you selected is already in use. Please select another username", "danger")
+        try :
+            current_user = fetch_user(form)
+        except Exception as error:
+            print(error)
+            current_user = None
+
+        if current_user is not None:
+            flash("The email you selected is already in use. Please select another email", "danger")
+            print(current_user)
             needs_to_redo_form = True
 
         # this makes all the error messages and then sends the user back
-        if needs_to_redo_form == True:
+        if needs_to_redo_form:
             return render_template(register_page, form=form)
 
         # add user to database
-        db.execute("INSERT INTO users (first, last, password_hash, email, time_stamp, permission_levels) VALUES (?, ?, ?, ?, ?, ?)",
-            (
-            str(form.data["first_name"]), 
-            str(form.data["last_name"]),
-            str(pwd_context.encrypt(form.password.data)),
-            str(form.data["email"]),
-            format_for_sql(convert_time(current_time())),
-            0
-            )
-        )
-        # CHANGE TO (NOTE: add phone number field to the form control)
-        # db.execute("INSERT INTO users (first, last, password_hash, email, phone, role) VALUES (?, ?, ?, ?, ?, ?)",
-        #     (
-        #     str(form.data["first_name"]), 
-        #     str(form.data["last_name"]),
-        #     str(pwd_context.encrypt(form.password.data)),
-        #     str(form.data["email"]),
-        #     str(form.data["phone"]),
-        #     'student'
-        #     )
-        # )
+        new_user = User()
+        data = (form.first_name.data, form.last_name.data, form.email.data, form.phone.data, 
+                pwd_context.hash(form.password.data), '"student"')
+        keys = tuple(new_user.__vars__.keys()) # to only fetch once and save iteration time
+        for i, val in enumerate(data):
+            new_user.__vars__[keys[1 + i]] = data[i]
+        db_handler.save("users", new_user)
 
-        # login user automatically and remember session
-        rows = db.execute("SELECT user_id FROM users WHERE email == ?", (str(form.data["email"]),))
-        session["user_id"] = rows[0][0]
-        session["permission_level"] = 0
-        # CHANGE: session["role"] = rows[0][2]
+        
+        session["user_id"] = fetch_user(form).__vars__["user_id"]
+        session["role"] = "student"
 
         # redirect to home page
         return redirect(url_for("student_classes_view"))
@@ -164,15 +153,16 @@ def do_register():
             if (field == "first_name") or (field == "last_name"):
                 flash("Please enter you name in the First and Last name boxes", "danger")
             elif (field == "email"):
-                flash("Please enter a valid, unused email address in the Email input box", "danger")
+                flash("Please enter a valid, unused email address in the Email box", "danger")
             elif (field == "password"):
-                flash("Please enter a valid password in the Password input box.",
-                       "danger")
+                flash("Please enter a valid password in the Password box.", "danger")
                 form.password.errors = ['Please enter a password which has a lowercase and uppercase letter, a number, a special character, and is 6-20 characters long']
             elif (field == "confirm_password"):
-                flash('The "Confirmed Password" input box must match the "Password" input box', "danger")
+                flash('The "Confirmed Password" box must match the "Password" box', "danger")
+            elif (field == "phone"):
+                flash("Please enter a valid phone number in the Phone Number box.", "danger")
             else:
-                flash("An unkown error has occurred", "danger")
+                flash("An unknown error has occurred", "danger")
 
         
         return render_template(register_page, form=form)

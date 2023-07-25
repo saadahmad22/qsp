@@ -4,7 +4,7 @@ from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import gettempdir
 
-from business_layer.login_manager import do_login, do_logout
+from business_layer.login_manager import do_login, do_logout, do_register
 
 from os import urandom as generate_secret_key
 
@@ -53,11 +53,9 @@ def teacher_classes_view():
 
     pass
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    '''TODO'''
-
-    pass
+    return do_register()
    
 if __name__ == "__main__":
     app.run()

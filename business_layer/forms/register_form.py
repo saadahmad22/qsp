@@ -1,12 +1,13 @@
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, EqualTo, Email
+from wtforms import PasswordField, StringField, SubmitField, ValidationError
+from wtforms.validators import DataRequired, Email, EqualTo, Regexp
 
 from .login_form import LoginForm
 
-class RegisterForm(LoginForm):
-    '''A class to serve base contruct for the registeration screen form 
 
-    This class represents different fields and values in a registerartion screen
+class RegisterForm(LoginForm):
+    '''A class to serve base construct for the registration screen form 
+
+    This class represents different fields and values in a registration screen
       using different objects from the wtforms module.
     
     Attributes:
@@ -15,7 +16,7 @@ class RegisterForm(LoginForm):
         username (StringField): makes a username field with the requirements of needing data 
             and being unique
         password (PasswordField): makes a password field with the requirements of needing data, 
-            being a ceratain length, and meeting the regex requirements. in addition, 
+            being a certain length, and meeting the regex requirements. in addition, 
             it securely stores and transmits the password from the user to the server.
             regex requirements:
                 - 1+ lower case
@@ -23,7 +24,7 @@ class RegisterForm(LoginForm):
                 - 1+ digit
                 - 1+ special character from @$!%*?& 
                 - 6-20 characters minimum from the above categories
-        confirm_pasword (PasswordField): makes a password field with the requirements of needing data,
+        confirm_password (PasswordField): makes a password field with the requirements of needing data,
             and matching with the password field
         submit (SubmitField): makes a submit field with the text 'Register'
 
@@ -32,7 +33,7 @@ class RegisterForm(LoginForm):
 
     '''
 
-    email = StringField("Email", validators=[DataRequired(), Email()], render_kw={"placeholder" : "Email" })
+    # NOTE: email and password inherited from loginform
 
     confirm_password = PasswordField(
         'Confirm Password', 
@@ -46,5 +47,11 @@ class RegisterForm(LoginForm):
 
     first_name = StringField("First Name", validators=[DataRequired()], render_kw={"placeholder" : "First Name" })
     last_name = StringField("Last Name", validators=[DataRequired()], render_kw={"placeholder" : "Last Name" })
+    phone = StringField(
+        'Phone', render_kw={"placeholder" : "Phone Number" }, validators=[
+            DataRequired(), 
+            Regexp(regex=r'^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$')
+            ])
+
 
     submit = SubmitField("Register")
