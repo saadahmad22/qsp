@@ -29,5 +29,6 @@ Thumbs.db
 *.exe
 *.o
 *.so
+*.pyc
 
 venv/

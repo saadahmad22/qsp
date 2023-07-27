@@ -60,19 +60,19 @@ class DataBaseHandler(DataBaseManager):
 
         for operation in operations:
             # check if literal. If it's not, then ? cannot be used
-            class_name = str(model.__class__.__name__).strip().lower()
-            if class_name not in str(operation.operand_a):
+            #class_name = str(model.__class__.__name__).strip().lower()
+            if not operation.operand_a_col:
                 args.append(operation.operand_a)
                 where_clause += " ? "
             else:
                 where_clause += str(operation.operand_a)
-            if class_name not in str(operation.operand_b):
+            if not operation.operand_b_col:
                 args.append(operation.operand_b)
                 where_clause += f" {operation.operator.value} ? "
             else:
                 where_clause += f' {operation.operator.value} {str(operation.operand_b)} '
             if operation.logical_operator:
-                where_clause += str(operation.logical_operator.name)
+                where_clause += f' {str(operation.logical_operator.name)} '
 
         order_by_str = "ORDER BY " 
         for col in order_by:
@@ -89,14 +89,13 @@ class DataBaseHandler(DataBaseManager):
             final_list.append(row_obj)
         return final_list
     
+    # def fetch_all(self, model : BaseModel, table_name : str) -> list:
+    #     return self.fetch_all(model, table_name, [], [])
+    
     def fetch(self, model : BaseModel, table_name : str, operations: list, order_by : list) -> None | BaseModel:
         return_val = self.fetch_all(model, table_name, operations, order_by)
         return None if len(return_val) < 1 else return_val[0]
-
-# #save("users", my_user)
-# operation1 = Operation("user_id", 10001, RelationalOperator.EQ, logical_operator=LogicalOperator.AND)
-# operation2 = Operation("email", '"my_email"', RelationalOperator.EQ)
-# order_clause = OrderClause("email", OrderType.DESC)
-
-# #update("users", {"first" : "my_name"}, [operation1, operation2])
-# print(fetch_all(User(), "users", [operation1, operation2], [order_clause]))
+    
+    # def fetch(self, model : BaseModel, table_name : str) -> None | BaseModel:
+    #     return_val = self.fetch_all(model, table_name, [], [])
+    #     return None if len(return_val) < 1 else return_val[0]

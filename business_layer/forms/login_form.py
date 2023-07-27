@@ -37,5 +37,5 @@ class LoginForm(FlaskForm):
         render_kw={"placeholder" : "Password" }
     )
 
-    submit = SubmitField("Login")
+    submit = SubmitField("Log in")
 

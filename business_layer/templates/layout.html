@@ -14,6 +14,7 @@
         <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet"/>
 
         <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script src="{{ url_for('static', filename='js_methods.js') }}"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
         
@@ -39,16 +40,18 @@
                     </div>
                     <div class="collapse navbar-collapse" id="navbar">
                         {% if session.user_id %}
-                            {% if session.permission_level == 0 %}
+                            {% if session.role == "student" %}
+                            <!--student view-->
                             <ul class="nav navbar-nav">
-                                <li><a href="{{ url_for('default_page') }}">Home</a></li>
-                                <li><a href="{{ url_for('student_classes_view') }}">Overview</a></li>
+                                <li><a href="{{ url_for('student_classes_view') }}">Home</a></li>
+                                <li><a href="{{ url_for('default_page') }}">View classes</a></li>
                             </ul>
                             <ul class="nav navbar-nav navbar-right">
                                 <li><a href="{{ url_for('logout') }}">Account</a></li>
                                 <li><a href="{{ url_for('logout') }}">Log Out</a></li>
                             </ul>
                             {% else %}
+                            <!--teacher view -->
                             <ul class="nav navbar-nav">
                                 <li><a href="{{ url_for('teacher_classes_view') }}">Overview</a></li>
                             </ul>
@@ -58,7 +61,7 @@
                             </ul>
                             {% endif %}
                         {% else %}
-                            <!--works fine-->
+                            <!--not logged in-->
                             <ul class="nav navbar-nav">
                                 <li><a href="{{ url_for('default_page') }}">Home</a></li>
                             </ul>
