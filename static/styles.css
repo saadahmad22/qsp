@@ -11,6 +11,10 @@
     margin-right: 0;
 }
 
+.invalid-feedback {
+  color: red;
+}
+
 /* colors for navbar */
 .navbar-default .navbar-brand .blue
 {

@@ -26,5 +26,6 @@ Classes:
 
 from .register_form import RegisterForm
 from .login_form import LoginForm
+from .std_hmpg import StdHomePage
 
-__all__ = ["RegisterForm", "LoginForm"]
+__all__ = ["RegisterForm", "LoginForm", "StdHomePage"]

@@ -110,6 +110,15 @@ class BaseModel:
         
         self.__vars__ = new_vars
 
+    def get(self, field : str):
+        '''Returns the stored value, or an error if it fails'''
+
+        try: 
+            return self.__vars__[str(field)]
+        except Exception:
+            raise ValueError(f'The field, {field}, cannot be found in {self.__vars__}')
+
+    
     @staticmethod
     def _str_to_correct_type(val : str, val_type : Type):
         if not isinstance(val, str):

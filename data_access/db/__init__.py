@@ -27,7 +27,8 @@ from .enums import OrderType, LogicalOperator
 from .oder_clause import OrderClause
 from .relational_operator import RelationalOperator
 from .operation import Operation
+from .table_fetchers import fetch_user
 
 
 
-__all__ = ["DataBaseHandler", "LogicalOperator", "OrderType", "OrderClause", "RelationalOperator", "Operation"]
+__all__ = ["DataBaseHandler", "LogicalOperator", "OrderType", "OrderClause", "RelationalOperator", "Operation", "fetch_user"]

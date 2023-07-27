@@ -4,7 +4,8 @@ from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import gettempdir
 
-from business_layer.login_manager import do_login, do_logout, do_register
+from business_layer.login_manager import do_login, do_logout, do_register, student_login_required
+from business_layer.student_views import do_student_home_page 
 
 from os import urandom as generate_secret_key
 
@@ -41,11 +42,14 @@ def login():
 def logout():
     return do_logout()
 
-@app.route("/student/home")
+@student_login_required
+@app.route("/student/home", methods=["GET", "POST"])
 def student_classes_view():
     '''TODO'''
 
-    pass
+    return do_student_home_page()
+
+    
 
 @app.route("/teacher/home")
 def teacher_classes_view():

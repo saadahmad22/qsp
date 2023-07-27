@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Overview
+{% endblock %}
+
+{% block main %}
+    {% if num_schedules <= 0 %}
+        <h3 class="text-center text-danger">No enrolled classes.</h3>
+        <h4><a href="{{url_for('logout')}}">Please register here.</a></h4>
+    {% elif num_schedules > 1  %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="d-flex justify-content-between">
+                <form action="{{url_for('student_classes_view')}}" method="POST">  
+                    {{ form.csrf_token }}
+                    {{ form.selected_class(style="float:left", class_="form-select form-control") }}
+                    {{ form.submit(style="float:left; margin-left:5px", class_="btn btn-primary ml-3") }}
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        /*var select_val = {{ -1 if (not selected_class) else selected_class }};
+        const json_data = JSON.parse({{#schedules_json|tojson|safe}});
+        $( document ).ready(function() {
+            populate_id("selected_class", json_data, select_val);
+        }) */
+    </script>
+    {% endif %}
+{% endblock %}
