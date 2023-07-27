@@ -7,8 +7,7 @@ from passlib.apps import custom_app_context as pwd_context
 # append the path of the parent directory
 sys.path.append("..")
 
-from data_access.db import (DataBaseHandler, LogicalOperator, Operation,
-                            RelationalOperator)
+from data_access.db import DataBaseHandler, fetch_user
 from data_access.models import User
 
 from .forms import LoginForm, RegisterForm
@@ -70,7 +69,7 @@ def do_login():
     if form.validate_on_submit():
         # query database for username
         try :
-            current_user = fetch_user(form)
+            current_user = fetch_user(email=str(form.email.data))
         except Exception as error:
             print(error)
             current_user = None
@@ -92,17 +91,11 @@ def do_login():
         session["permission_level"] = current_user.__vars__["role"]
 
         # redirect user to home page
-        return redirect(url_for("default_page"))
+        return redirect(url_for("student_classes_view"))
 
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template(login_page, form=form)
-    
-def fetch_user(form : LoginForm) -> User:
-    '''Returns a list of Users (fetched from the db) from the data retrieved in login_form'''
-
-    search_args = Operation("users.email", f'{str(form.email.data)}', RelationalOperator.EQ)
-    return db_handler.fetch(User(), "users", [search_args], [])
 
 def do_register():
     """Register user."""
@@ -117,7 +110,7 @@ def do_register():
 
         # ensure email is unique
         try :
-            current_user = fetch_user(form)
+            current_user = fetch_user(email=str(form.email.data))
         except Exception as error:
             print(error)
             current_user = None
