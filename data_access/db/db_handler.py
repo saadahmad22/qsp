@@ -60,7 +60,6 @@ class DataBaseHandler(DataBaseManager):
 
         for operation in operations:
             # check if literal. If it's not, then ? cannot be used
-            #class_name = str(model.__class__.__name__).strip().lower()
             if not operation.operand_a_col:
                 args.append(operation.operand_a)
                 where_clause += " ? "
@@ -89,13 +88,6 @@ class DataBaseHandler(DataBaseManager):
             final_list.append(row_obj)
         return final_list
     
-    # def fetch_all(self, model : BaseModel, table_name : str) -> list:
-    #     return self.fetch_all(model, table_name, [], [])
-    
     def fetch(self, model : BaseModel, table_name : str, operations: list, order_by : list) -> None | BaseModel:
         return_val = self.fetch_all(model, table_name, operations, order_by)
         return None if len(return_val) < 1 else return_val[0]
-    
-    # def fetch(self, model : BaseModel, table_name : str) -> None | BaseModel:
-    #     return_val = self.fetch_all(model, table_name, [], [])
-    #     return None if len(return_val) < 1 else return_val[0]

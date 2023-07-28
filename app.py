@@ -1,4 +1,4 @@
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, flash, redirect, render_template, url_for
 from flask_wtf.csrf import CSRFProtect
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
@@ -6,6 +6,7 @@ from tempfile import gettempdir
 
 from business_layer.login_manager import do_login, do_logout, do_register, student_login_required
 from business_layer.student_views import do_student_home_page 
+from business_layer.api import do_get_calendar 
 
 from os import urandom as generate_secret_key
 
@@ -13,11 +14,11 @@ from flask import Flask
 
 
 
-# create and configure the app/jinja enviroment
+# create and configure the app/jinja environment
 app = Flask(__name__, template_folder="./business_layer/templates")
 app.config["SECRET_KEY"] = generate_secret_key(31) # 31 chars, ~ 128-bit key
 app.config["SESSION_TYPE"] = "filesystem"
-# crsf
+# csrf
 csrf = CSRFProtect(app)
 # jinja filter/s
 #app.jinja_env.filters['json_dumps_filter'] = json_dumps_filter
@@ -49,7 +50,10 @@ def student_classes_view():
 
     return do_student_home_page()
 
-    
+@app.route("/api/student_calendar/", defaults={'schedule_id': -1})
+@app.route("/api/student_calendar/<schedule_id>")    
+def get_calendar(schedule_id):
+    return do_get_calendar(schedule_id)
 
 @app.route("/teacher/home")
 def teacher_classes_view():
