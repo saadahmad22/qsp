@@ -1,15 +1,23 @@
 import sys
 from json import dumps
+from flask import redirect, flash, request
 
 sys.path.append("..")
 
 from data_access.db import (DataBaseHandler, Operation, RelationalOperator)
-from data_access.models import Schedules
+from data_access.models import Schedules, ClassSchedules
 from data_access.models.base_models import date, timedelta
-from data_access.views import CourseCalendar
+from data_access.views import CourseCalendar, CalendarInfo
 
+def do_error():
+    '''Flashes the desired message and redirects to the desired url'''
 
-def do_get_calendar(schedule_id):
+    error_json = request.get_json()
+    flash(f'''{error_json["message"]}
+{error_json["error_message"]}''')
+    return redirect(request.get_json()["url"])
+
+def do_get_calendar(schedule_id : int, month_id : str=None):
     '''Returns the JSON required to construct student home page calendar
     
     JSON structure
@@ -17,46 +25,94 @@ def do_get_calendar(schedule_id):
         - Schedules fields in top level
         - include schedule_id, class_id, teacher_id,
             start_date, end_date, price, digital_meeting_link, max_students, status
-        - "DAYS" : list of all the required calendar dates
-            -  "monthid" : {
-                    first_day : <of month> (Monday = 0)
-                    YYYY-MM-DD : {
-                        either {class_date: '2023-08-01', status: 'inactive'}
-                    }
+        - title, desc, teacher full name ("name"), schedule_id
+        - "generic_days" : [
+            weekday : {
+                start_time : 24-hour HH:MM, 
+                end_time : 24-hour HH:MM
+            }
+        ]
+        - "days" : list of all the required calendar dates [
+            -  "month_id" : {
+                first_day : <of month> (Monday = 0)
+                YYYY-MM-DD : {
+                    either {status: 'inactive'} or a fully mapped @CourseCalendar object
                 }
-    }
+            }
+        ]
 
+    }
     '''
+
+    db_handler = DataBaseHandler()
 
     # convenience operator to check that the schedule_id column matches input
     schedule_op = Operation("schedule_id", schedule_id, RelationalOperator.EQ, operand_a_col=True)
     # load the class, else throw an HTTP error
     try :
-        view = DataBaseHandler().fetch(Schedules(), "schedules", [schedule_op], [])
+        view = db_handler.fetch(Schedules(), "schedules", [schedule_op], [])
     except Exception:
         return "Class not found", 400 
-    # fetch and sort the schedule's calendar. NOTE: there will be empty dates that need to be filled up as such 
-    days = DataBaseHandler().fetch_all(CourseCalendar(), "course_calendar_view", [schedule_op], [])  
+    
+    # fetch and sort the schedule's calendar. NOTE: there will be empty dates that need to be handled front end
+    days = db_handler.fetch_all(CourseCalendar(), "course_calendar_view", [schedule_op], [])  
     days.sort(key=lambda day : day.get("class_date"))  
-    # loop through every day between the class's start and end, then populate the empty days
-    # at the same time, organize all days into a month
-    start_date = view.get("start_date") # convenience fetch to save cpu
-    start = date(start_date.year, start_date.month, 1) # start date
-    end_date = view.get("end_date")  # convenience fetch to save cpu
-    end = (end_date.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1) # end date
-    days_fetched = [day.get("class_date") for day in days] # days already present
-    i = 0 # index of number of days in from the schedule's start month to the end month 
-    months = {}
-    for a_day in Schedules.date_range(start, end):
-        if a_day not in days_fetched:
-            days.insert(i, {"status" : "inactive"})
-        month_id = f'{str(a_day.month).zfill(2)}{a_day.year}'
-        if a_day.day == 1: # put one time code for the month here as well
-            months[month_id] = {"first_day" : a_day.weekday()}
-        months[month_id][str(a_day)] = {field : str(val) for field, val in (days[i].__vars__.items() if isinstance(days[i], CourseCalendar) else days[i].items())}
-        i += 1
+
+    # fetch extra calendar info
+    calendar_info = db_handler.fetch(CalendarInfo(), "calendar_info", [schedule_op], [])
+
+    # loop through every day in days and organize them into a month
+    class_start = view.get("start_date") if not month_id else date(int(month_id[2:]), int(month_id[:2]), 1)
+    next_ = (class_start + timedelta(days=31))
+    prev_ = (class_start - timedelta(days=3))
+    # fill up month
+    first_day = class_start.replace(day=1)
+    temp_day = first_day
+    weeks = 0
+    while temp_day.month == first_day.month:
+        weeks += 1
+        temp_day += timedelta(days=7)
+    month = {
+        "first_day" : first_day.weekday(), 
+        "last_day" : ((first_day.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)).day,
+        "weeks" : weeks, 
+        "name" : first_day.strftime("%B"), 
+        "year" : first_day.year,
+        "next" : {"is_class" : False, "id" :f'{str(next_.month).zfill(2)}{next_.year}' },
+        "prev" : {"is_class" : False, "id" :f'{str(prev_.month).zfill(2)}{prev_.year}' }
+        }
+    for day in days:
+        a_day = day.get("class_date")
+        # month_id = f'{str(a_day.month).zfill(2)}{a_day.year}'
+        if eq_month_year(a_day, class_start):
+            month[day.get("class_date").day] = {field : str(val) for field, val in day.__vars__.items()}
+        else:
+            if eq_month_year(a_day, next_):
+                month["next"]["is_class"] = True
+            elif eq_month_year(a_day, prev_):
+                month["prev"]["is_class"] = True
+                
+
     # load data to a dict b/c original classes aren't serializable
     schedule_json = {key : str(val) for key, val in view.__vars__.items()}
-    schedule_json["DAYS"] = months
+    schedule_json["month"] = month
+    schedule_json["generic_days"] = [
+            {
+            "weekday"  : {
+            "start" : str(weekday.get("start_time")),
+            "end" : str(weekday.get("end_time")),
+            "name" : weekday.get("weekday")
+            }
+        }
+        for weekday in db_handler.fetch_all(ClassSchedules(), "class_schedules", [schedule_op], [])
+        ]
+    schedule_json.update({
+        "title" : calendar_info.get("title"),
+        "desc" : calendar_info.get("description"),
+        "name" : calendar_info.get("first") + " " + calendar_info.get("last")
+        })
 
     return dumps(schedule_json)
+
+def eq_month_year(date1 : date, date2 : date) -> bool:
+    return isinstance(date1, date) and isinstance(date2, date) and  date1.month == date2.month and date1.year == date2.year

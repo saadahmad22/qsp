@@ -1,5 +1,3 @@
-# 
-
 from ..models.base_models import BaseTimeModel, date, time
 
 class CourseCalendar(BaseTimeModel):

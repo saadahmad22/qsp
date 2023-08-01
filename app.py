@@ -6,7 +6,7 @@ from tempfile import gettempdir
 
 from business_layer.login_manager import do_login, do_logout, do_register, student_login_required
 from business_layer.student_views import do_student_home_page 
-from business_layer.api import do_get_calendar 
+from business_layer.api import do_get_calendar, do_error
 
 from os import urandom as generate_secret_key
 
@@ -27,6 +27,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_FILE_DIR"] = gettempdir()
 Session(app)
 
+#-----------------------General pages-----------------------
 @app.route("/")
 def default_page():
     return redirect(url_for("home_page"))
@@ -35,6 +36,7 @@ def default_page():
 def home_page():
     return render_template("index.html")
 
+#-----------------------Login pages-----------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     return do_login()
@@ -43,6 +45,11 @@ def login():
 def logout():
     return do_logout()
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    return do_register()
+
+#-----------------------Student pages-----------------------
 @student_login_required
 @app.route("/student/home", methods=["GET", "POST"])
 def student_classes_view():
@@ -50,20 +57,27 @@ def student_classes_view():
 
     return do_student_home_page()
 
-@app.route("/api/student_calendar/", defaults={'schedule_id': -1})
-@app.route("/api/student_calendar/<schedule_id>")    
-def get_calendar(schedule_id):
-    return do_get_calendar(schedule_id)
-
+#-----------------------Teacher pages-----------------------
 @app.route("/teacher/home")
 def teacher_classes_view():
     '''TODO'''
 
     pass
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    return do_register()
    
+#-----------------------API pages-----------------------
+@app.route("/api/student_calendar/", defaults={'schedule_id': -1})
+@app.route("/api/student_calendar/<schedule_id>")    
+def get_calendar(schedule_id):
+    return do_get_calendar(schedule_id)
+
+@app.route("/api/student_calendar/<schedule_id>/<month_id>")
+def get_calendar_via_month(schedule_id, month_id):
+    return do_get_calendar(schedule_id, month_id=month_id)
+
+@app.route("/api/error", methods=["POST"])
+def error_():
+    return do_error()
+
+#-----------------------Launch the app-----------------------
 if __name__ == "__main__":
     app.run()

@@ -12,6 +12,7 @@ class Schedules(BaseTimeModel):
         'price' : float,
         'digital_meeting_link' : str,
         'max_students' : int,
-        'status' : str
+        'status' : str,
+        "digital_meeting_credentials" : str
         }
         BaseTimeModel.__init__(self)

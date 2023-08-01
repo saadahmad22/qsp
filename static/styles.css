@@ -142,7 +142,10 @@ main td
     padding: 0.4em 0.65em;
     font-size: 1em;
     line-height: 1.5;
-    border-radius: 0.25em;
+    border-radius: 0.35em;
+    width: 50px;
+    margin-left: 5px;
+    margin-right: 5px;
   }
 
   .today_button {
