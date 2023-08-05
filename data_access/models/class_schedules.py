@@ -7,7 +7,7 @@ class ClassSchedules(BaseTimeModel):
         'stw_id' : int,
         'schedule_id' : int,
         'weekday' : str,
-        'starttime' : time,
-        'endtime' : time
+        'start_time' : time,
+        'end_time' : time
         }
         BaseTimeModel.__init__(self)

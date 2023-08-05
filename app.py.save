@@ -157,3 +157,107 @@ def register():
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("register.html", form=form, users=users)
+
+
+<!-- Create Calendar -->
+    <div id="calendar" class="calendar shadow-sm p-1">
+        <!-- Row 1: Month on left, today, back, and next on right -->
+        <div id="row1" class="cal_row inline_row">
+        <div id="left_portion" class="cal_row">
+            <h1>{{month_year[0]}}, {{month_year[1]}}</h1>
+        </div>
+        <div id="right_portion" >
+            <button class="cal_button today_button">
+            &#60;
+            </button>
+            <button class="cal_button today_button">
+            Today
+            </button>
+            <button class="cal_button today_button">
+            &#62;
+            </button>
+        </div>
+        </div>
+        <!-- Row 2: calendar rows range from 4-6 per month, read from python 2-d array of the month -->
+        <div id="row2">
+        <table class="date_container">
+            <thead>
+            <tr class="cal_row">
+                <th class="cal_cell">Sun</th>
+                <th class="cal_cell">Mon</th>
+                <th class="cal_cell">Tue</th>
+                <th class="cal_cell">Wed</th>
+                <th class="cal_cell">Thu</th>
+                <th class="cal_cell">Fri</th>
+                <th class="cal_cell">Sat</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- make a row for every week-->
+            {% for week in month_list %}             
+                <tr class="cal_row">
+                {% for day in week %}
+                    {% if day == 0 %}
+                    <td  class="cal_cell">
+                    <span class="day" id="{{day}}">&nbsp;
+                    </span>
+                    </td>
+                    {% else %}
+                    <td class="cal_cell">
+
+                    <div class="cell_row">
+                        <div class="cell_column" style="background-color:#ffffff;">
+                        <p style="text-align: right;" >  {{ day }}</p>
+                        </div>
+                    </div>
+
+                    {% if day|string in rendered_days %}  
+                    <div class="cell_row">
+                        <div>              
+                            <p class="event" id="{{day}}_hours"></p>
+                        </div>
+                    </div>
+                    <div class="cell_row">
+                        <div style="background-color:#ffffff;text-align: center;" id="{{day}}_notes">                                
+                            <a onclick="populate_cal_div('{{month_year[0]}},{{day}},{{month_year[1]}}')">View Notes</a>
+                        </div>
+                    </div>
+                    <script>
+                        const hour_manager = document.getElementById("{{day}}_hours");
+                        const detail_manager = document.getElementById("{{day}}_notes");
+                        for (let index in schedules) {
+                        if (schedules[index][2] == '{{month_year[0]}},{{day}},{{month_year[1]}}') {
+                            if (schedules[index][4] == null) {
+                            hour_manager.textContent = "\u00A0";
+                            hour_manager.classList.remove("event");
+                            detail_manager.innerHTML= '';
+                            const blank_element = detail_manager.creatElement('p');
+                            blank_element.textContent = "\u00A0";
+                            detail_manager.appendChild(blank_element);
+                            }
+                            break;
+                        }
+                        }
+                    </script>
+                    {% else %}
+                    <div class="cell_row">
+                        <div style="background-color:#ffffff;text-align: center;">                                
+                            <p>&nbsp</p>
+                        </div>
+                    </div>
+                    <div class="cell_row">
+                        <div style="background-color:#ffffff;text-align: center;">                                
+                            <p>&nbsp</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    </td>
+                    {% endif %}
+                {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    </div>

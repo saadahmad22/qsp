@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block main %}
+    <script src="{{ url_for('static', filename='populate_cal.js') }}"></script>
     {% if num_schedules <= 0 %}
         <h3 class="text-center text-danger">No enrolled classes.</h3>
         <h4><a href="{{url_for('logout')}}">Please register here.</a></h4>
@@ -14,17 +15,68 @@
             <div class="d-flex justify-content-between">
                 <form action="{{url_for('student_classes_view')}}" method="POST">  
                     {{ form.csrf_token }}
-                    {{ form.selected_class(style="float:left", class_="form-select form-control") }}
-                    {{ form.submit(style="float:left; margin-left:5px", class_="btn btn-primary ml-3") }}
+                    {{ form.selected_class(style="max-width:20%", class_="form-select form-control") }}
                 </form>
             </div>
         </div>
     </div>
+    <div class="card">
+        <div class="card-body" style="text-align: left;" id="calendar_info">
+        </div>
+    </div>
+    </br>
+    </br>
+    <div id="calendar_info" style="text-align: start;">
+        <h5 class="card-title" id="calendar_extra_info_header"></h5>
+        <p id="calendar_extra_info" class="card-text"></p>
+    </div>
+    </br>
+    <div id="calendar" class="calendar shadow-sm p-1">
+    </div>
+    
     <script>
-        /*var select_val = {{ -1 if (not selected_class) else selected_class }};
-        $( document ).ready(function() {
-            populate_id("selected_class", json_data, select_val);
-        }) */
+        $( "#selected_class" ).on( "change", function() {
+            const selected_class = $("#selected_class").val()
+            const class_cookie = get_class_data_from_cookie(selected_class)
+            if (class_cookie && class_cookie != "undefined") {
+                new_month(class_cookie);
+            }
+            else {
+                new_month();
+            }
+        } );
+        var calendar_json = null;
+
+        function fetch_cal(month_id) {
+            const api_url = "{{ url_for('get_calendar') }}" + $("#selected_class").val() + (month_id == undefined ? "" : "/" + month_id);
+            $.ajax({
+                type: "GET",
+                url: api_url,
+                dataType: "json",
+                async : false,
+                success: function (result, status, xhr) {
+                    calendar_json = result;
+                },
+                error: error_template
+            });
+        }
+        
+        function error_template (xhr, status, error) {
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('error_') }}",
+                data : JSON.stringify( {
+                    url : "{{ url_for('student_classes_view') }}",
+                    message : `${error} happened while fetching ${$("#selected_class").text()}`,
+                    error_message : xhr.responseText
+                }),
+                success : function(response) {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } 
+                }
+            });
+        }
     </script>
     {% endif %}
 {% endblock %}

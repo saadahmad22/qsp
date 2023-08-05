@@ -7,30 +7,30 @@ from data_access.views import CourseCalendar, MyCourses
 from data_access.db import DataBaseHandler, Operation, RelationalOperator, OrderClause, OrderType
 
 # test code for get method
-enrolled_schedules = DataBaseHandler().fetch_all(MyCourses(), "my_courses_view", 
-    [Operation("user_id", 3, RelationalOperator.EQ, operand_a_col=True)], 
-    [OrderClause("schedule_id", OrderType.ASC)])
+# enrolled_schedules = DataBaseHandler().fetch_all(MyCourses(), "my_courses_view", 
+#     [Operation("user_id", 3, RelationalOperator.EQ, operand_a_col=True)], 
+#     [OrderClause("schedule_id", OrderType.ASC)])
 
-# store all the data from above to a json to get pushed to jinja
-print(dumps({str(schedule.get("schedule_id")) : {field : str(value) for field, value in schedule.__vars__.items()} for schedule in enrolled_schedules}))
+# # store all the data from above to a json to get pushed to jinja
+# print(dumps({str(schedule.get("schedule_id")) : {field : str(value) for field, value in schedule.__vars__.items()} for schedule in enrolled_schedules}))
 
 # fetch the enrolled schedules
-# schedule_op = Operation("schedule_id", 303, RelationalOperator.EQ, operand_a_col=True)
+schedule_op = Operation("schedule_id", 303, RelationalOperator.EQ, operand_a_col=True)
 
-# my_course_view = DataBaseHandler().fetch_all(MyCourses(), "my_courses_view", 
-#     [Operation("user_id", 1, RelationalOperator.EQ, LogicalOperator.AND, operand_a_col=True), schedule_op], [])
+my_course_view = DataBaseHandler().fetch_all(MyCourses(), "my_courses_view", 
+    [Operation("user_id", 1, RelationalOperator.EQ, LogicalOperator.AND, operand_a_col=True), schedule_op], [])
 
-# # pull all the schedules from the query above and make an or pull with them
-# # operations = []
-# # for schedule in my_course_view:
-# #     operations.append(Operation("schedule_id", str(schedule.get("schedule_id")), RelationalOperator.EQ, operand_a_col=True))
+# pull all the schedules from the query above and make an or pull with them
+# operations = []
+# for schedule in my_course_view:
+#     operations.append(Operation("schedule_id", str(schedule.get("schedule_id")), RelationalOperator.EQ, operand_a_col=True))
 
-# for view in my_course_view:
-#     view.days = DataBaseHandler().fetch_all(CourseCalendar(), "course_calendar_view", [schedule_op], [])  
-#     view.days.sort(key=lambda day : day.get("class_date"))  
-#     my_json_var = {key : str(val) for key, val in view.__vars__.items()}
-#     my_json_var["DAYS"] = [{key : str(val) for key, val in x.__vars__.items()} for x in view.days]
-#     print(dumps(my_json_var))
+for view in my_course_view:
+    view.days = DataBaseHandler().fetch_all(CourseCalendar(), "course_calendar_view", [schedule_op], [])  
+    view.days.sort(key=lambda day : day.get("class_date"))  
+    my_json_var = {key : str(val) for key, val in view.__vars__.items()}
+    my_json_var["DAYS"] = [{key : str(val) for key, val in x.__vars__.items()} for x in view.days]
+    print(dumps(my_json_var))
 
 
 
