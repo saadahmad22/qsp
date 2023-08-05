@@ -23,13 +23,15 @@ function new_month(month_id) {
     }
     else {
         fetch_cal();
-        const today_id = get_formatted_date(new Date());
-        if (calendar_json.months.includes(today_id)) {
-            new_month(today_id);
+        if (today_in_cal()) {
+            new_month(get_formatted_date(new Date()));
         }
-        
     }
     create_cal();
+}
+
+function today_in_cal() {
+    return calendar_json.months.includes(get_formatted_date(new Date()));
 }
 
 function empty_header() {
@@ -95,6 +97,9 @@ function populate_cal() {
                 calendarHTML += `<button disabled class="cal_button today_button")">&#60;</button>`;
             }
             calendarHTML += "";
+            if (today_in_cal()) {
+                calendarHTML += `<button class="cal_button today_button" onclick="new_month('${get_formatted_date(new Date())}')">Today</button>`;
+            }
             if (calendar_json.month.next.is_class) {
                 calendarHTML += `<button class="cal_button today_button" onclick="new_month('${calendar_json.month.next.id.toString()}')">&#62;</button>`;
             }
@@ -103,11 +108,6 @@ function populate_cal() {
             }
 
     calendarHTML += `
-            <!--
-            <button class="cal_button today_button">
-                Today
-            </button>
-            -->
             </div>
         </div>
         <table class="date_container">
@@ -122,78 +122,95 @@ function populate_cal() {
                     <th class="cal_cell">Sat</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody style="background-color: seashell;">
     `;
-    let first_day = calendar_json.month.first_day + 1 % 7;
+    const first_day = (calendar_json.month.first_day + 1) % 7;
     let date = 0;
+    
     for (let row = 0; row < calendar_json.month.weeks; row++) {
-        calendarHTML += `<tr class="cal_row">`;
-        for (let day = 0; day < 7; day++) {
-            if ((row == 0 && (day < first_day || (day == 0 && first_day == 0))) || date >= calendar_json.month.last_day) {
-                calendarHTML += `
-                    <td  class="cal_cell">
-                        <span class="day" id="0">&nbsp;</span>
-                    </td>
-                `;
+      calendarHTML += '<tr class="cal_row">';
+      for (let day = 0; day < 7; day++) {
+        if ((row === 0 && (day < first_day || (day === 0 && first_day === 0))) || date >= calendar_json.month.last_day) {
+          calendarHTML += `
+            <td class="cal_cell">
+              <span class="day" id="0">&nbsp;</span>
+            </td>
+          `;
+        } else {
+          date++;
+          // Add top
+          if (today_in_cal() && get_formatted_date(new Date()) == calendar_json.month.id && (new Date()).getDate() == date) {
+            calendarHTML += `
+            <td class="cal_cell">
+              <div class="cell_row">
+                <div class="cell_column">
+                    <p style="text-align: center;">${date}</p>
+                 </div>
+                 <div class="cell_column">
+                    <span class="badge badge-primary" style="color: #fff;background-color: #6c757d;">Today</span>
+                </div>
+              </div>
+          `;
+          }
+          else {
+            calendarHTML += `
+            <td class="cal_cell">
+              <div class="cell_row">
+                <div class="cell_column">
+                    <p style="text-align: right;">${date}</p>
+                 </div>
+              </div>
+          `;
+          }
+          if (calendar_json.month[date] === undefined) {
+            calendarHTML += `
+              <div class="cell_row">
+                <div style="text-align: center;">
+                  <p>&nbsp;</p>
+                </div>
+              </div>
+              <div class="cell_row">
+                <div style="text-align: center;">
+                  <p>&nbsp;</p>
+                </div>
+              </div>
+            `;
+          } else {
+            const a_day = calendar_json.month[date];
+            calendarHTML += `
+              <div class="cell_row">
+                <div>
+                  <p class="event" id="${date}_hours">${convert_time_to_12_hr(a_day.start_time)} - ${convert_time_to_12_hr(a_day.end_time)}</p>
+                </div>
+              </div>
+            `;
+            if (a_day.notes === 'None') {
+              calendarHTML += `
+                <div class="cell_row">
+                  <div style="text-align: center;">
+                    <p>&nbsp;</p>
+                  </div>
+                </div>
+              `;
             } else {
-                date++;
-                // Add top
-                calendarHTML += `
-                    <td class="cal_cell">
-                        <div class="cell_row">
-                            <div class="cell_column" style="background-color:#ffffff;">
-                                <p style="text-align: right;" >${date}</p>
-                            </div>
-                        </div>
-                `;
-                if (calendar_json.month[date] == undefined) {
-                    calendarHTML += `
-                        <div class="cell_row">
-                            <div style="background-color:#ffffff;text-align: center;">                                
-                                <p>&nbsp;</p>
-                            </div>
-                        </div>
-                        <div class="cell_row">
-                            <div style="background-color:#ffffff;text-align: center;">                                
-                                <p>&nbsp;</p>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    a_day = calendar_json.month[date];
-                    calendarHTML += `
-                        <div class="cell_row">
-                            <div>              
-                                <p class="event" id="${date}_hours">${convert_time_to_12_hr(a_day.start_time)} - ${convert_time_to_12_hr(a_day.end_time)}</p>
-                            </div>
-                        </div>
-                    `;
-                    if (a_day.notes == "None") {
-                        calendarHTML += `
-                            <div class="cell_row">
-                                <div style="background-color:#ffffff;text-align: center;">                                
-                                    <p>&nbsp;</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    else {
-                        calendarHTML += `
-                            <div class="cell_row">
-                                <div style="background-color:#ffffff;text-align: center;" id="${date}_notes">                                
-                                    <a onclick="populate_cal_info(${date})">View Notes</a>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-                // Close td
-                calendarHTML += `</td>`;
+              calendarHTML += `
+                <div class="cell_row">
+                  <div style="text-align: center;" id="${date}_notes">
+                    <a onclick="populate_cal_info(${date})">View Notes</a>
+                  </div>
+                </div>
+              `;
             }
+          }
+          // Close td
+          calendarHTML += '</td>';
         }
-        // Close tr
-        calendarHTML += `</tr>`;
+      }
+      calendarHTML += '</tr>';
     }
+    
+    // Use calendarHTML as needed...
+    
     // Close tbody and table
     calendarHTML += `</tbody></table>`;
     $("#calendar").append(calendarHTML);
