@@ -39,3 +39,19 @@ function get_num_with_suffix(number) {
         return number + "th";
     }
   }
+
+// Function to set class data in the cookie
+function set_class_data_in_cookie(classId, value) {
+  localStorage.setItem(classId, value);
+}
+
+// Function to get class data from the cookie
+function get_class_data_from_cookie(classId) {
+  return localStorage.getItem(classId);
+}
+
+function get_formatted_date(date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${month}${year}`;
+}

@@ -69,6 +69,7 @@ def do_get_calendar(schedule_id : int, month_id : str=None):
     first_day = class_start.replace(day=1)
     temp_day = first_day
     weeks = 0
+    months = [f'{str(first_day.month).zfill(2)}{first_day.year}']
     while temp_day.month == first_day.month:
         weeks += 1
         temp_day += timedelta(days=7)
@@ -78,24 +79,29 @@ def do_get_calendar(schedule_id : int, month_id : str=None):
         "weeks" : weeks, 
         "name" : first_day.strftime("%B"), 
         "year" : first_day.year,
+        "id" : f'{str(first_day.month).zfill(2)}{first_day.year}',
         "next" : {"is_class" : False, "id" :f'{str(next_.month).zfill(2)}{next_.year}' },
-        "prev" : {"is_class" : False, "id" :f'{str(prev_.month).zfill(2)}{prev_.year}' }
+        "prev" : {"is_class" : False, "id" :f'{str(prev_.month).zfill(2)}{prev_.year}' },
         }
     for day in days:
         a_day = day.get("class_date")
-        # month_id = f'{str(a_day.month).zfill(2)}{a_day.year}'
         if eq_month_year(a_day, class_start):
             month[day.get("class_date").day] = {field : str(val) for field, val in day.__vars__.items()}
         else:
-            if eq_month_year(a_day, next_):
-                month["next"]["is_class"] = True
-            elif eq_month_year(a_day, prev_):
-                month["prev"]["is_class"] = True
+            id_ = f'{str(a_day.month).zfill(2)}{a_day.year}'
+            if id_ not in months:
+                months.append(id_)
+                if eq_month_year(a_day, next_):
+                    month["next"]["is_class"] = True
+                elif eq_month_year(a_day, prev_):
+                    month["prev"]["is_class"] = True
+            
                 
 
     # load data to a dict b/c original classes aren't serializable
     schedule_json = {key : str(val) for key, val in view.__vars__.items()}
     schedule_json["month"] = month
+    schedule_json["months"] = months
     schedule_json["generic_days"] = [
             {
             "weekday"  : {

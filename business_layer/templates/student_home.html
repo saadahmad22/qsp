@@ -35,26 +35,17 @@
     </div>
     
     <script>
-        /*var select_val = {{ -1 if (not selected_class) else selected_class }};
-        $( document ).ready(function() {
-            populate_id("selected_class", json_data, select_val);
-        }) */
         $( "#selected_class" ).on( "change", function() {
-            new_month();
+            const selected_class = $("#selected_class").val()
+            const class_cookie = get_class_data_from_cookie(selected_class)
+            if (class_cookie && class_cookie != "undefined") {
+                new_month(class_cookie);
+            }
+            else {
+                new_month();
+            }
         } );
         var calendar_json = null;
-        function fetch_cal() {
-            $.ajax({
-                type: "GET",
-                url: "{{ url_for('get_calendar') }}" + $("#selected_class").val(),
-                dataType: "json",
-                async : false,
-                success: function (result, status, xhr) {
-                    calendar_json = result;
-                },
-                error: error_template
-            });
-        }
 
         function fetch_cal(month_id) {
             const api_url = "{{ url_for('get_calendar') }}" + $("#selected_class").val() + (month_id == undefined ? "" : "/" + month_id);

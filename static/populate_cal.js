@@ -19,9 +19,15 @@ function new_month(month_id) {
 
     if (month_id != undefined) {
         fetch_cal(month_id);
+        set_class_data_in_cookie(calendar_json.schedule_id, calendar_json.month.id);
     }
     else {
         fetch_cal();
+        const today_id = get_formatted_date(new Date());
+        if (calendar_json.months.includes(today_id)) {
+            new_month(today_id);
+        }
+        
     }
     create_cal();
 }
@@ -69,7 +75,7 @@ function populate_info() {
             });
     $("#calendar_info").append(`${days_info}
     </ul>`);
-    if (calendar_json.digital_meeting_link != undefined && calendar_json.digital_meeting_link != "None" && calendar_json.digital_meeting_link.length() > 1) {
+    if (calendar_json.digital_meeting_link != undefined && calendar_json.digital_meeting_link != "None" && calendar_json.digital_meeting_link.length > 1) {
         $("#calendar_info").append(`<a class="card-text" style="display: flex" href="Class Meeting Link : ${calendar_json.digital_meeting_link}">${calendar_json.digital_meeting_link}</a>`);
     }
 
