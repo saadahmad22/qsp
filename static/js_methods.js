@@ -18,6 +18,16 @@ function convert_time_to_12_hr(americaChicagoTime) {
     return localTimeFormatted;
 }
 
+function date_sorter(a, b) {
+  if (!(a && a.trim() != "--")) {
+    a = "01/01/0001";
+  }
+  if (!(b && b.trim() != "--")) {
+    b = "01/01/0001";
+  }
+  return new Date(a) - new Date(b);
+}
+
 function get_num_with_suffix(number) {
     // Convert the number to a string to extract the last digit
     const lastDigit = number.toString().slice(-1);
@@ -39,6 +49,22 @@ function get_num_with_suffix(number) {
         return number + "th";
     }
   }
+
+function check_paid(row, _) {
+  if (row["paid"] == "Yes" || new Date(row["pay_from_date"]) > new Date()) {
+    return {
+      classes : "bg-success"
+    }
+  }
+  else if (new Date() <= new Date(row["pay_to_date"])) {
+    return {
+      classes : "bg-warning"
+    }
+  }
+  return {
+    classes : "bg-danger"
+  }
+}
 
 // Function to set class data in the cookie
 function set_class_data_in_cookie(classId, value) {

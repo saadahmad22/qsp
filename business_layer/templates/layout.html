@@ -43,32 +43,33 @@
                             {% if session.role == "student" %}
                             <!--student view-->
                             <ul class="nav navbar-nav">
-                                <li><a href="{{ url_for('student_classes_view') }}">Home</a></li>
-                                <li><a href="{{ url_for('default_page') }}">View classes</a></li>
+                                <li><a href="{{ url_for('student_classes_view') }}">{{ navbar.get("HOME") }}</a></li>
+                                <li><a href="{{ url_for('student_payments') }}">{{ navbar["STUDENT"].get("PAYMENTS") }}</a></li>
+                                <li><a href="{{ url_for('default_page') }}">{{ navbar["STUDENT"].get("OFFERINGS") }}</a></li>
                             </ul>
                             <ul class="nav navbar-nav navbar-right">
-                                <li><a href="{{ url_for('logout') }}">Account</a></li>
-                                <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+                                <li><a href="{{ url_for('logout') }}">{{ navbar["STUDENT"].get("ACCOUNT") }}</a></li>
+                                <li><a href="{{ url_for('logout') }}">{{ navbar["STUDENT"].get("LOGOUT") }}</a></li>
                             </ul>
                             {% else %}
-                            <!--teacher view -->
+                            <!--teacher view-->
                             <ul class="nav navbar-nav">
-                                <li><a href="{{ url_for('teacher_classes_view') }}">Overview</a></li>
+                                <li><a href="{{ url_for('teacher_classes_view') }}">{{ navbar.get("HOME") }}</a></li>
                             </ul>
                             <ul class="nav navbar-nav navbar-right">
-                                <li><a href="{{ url_for('logout') }}">Account</a></li>
-                                <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+                                <li><a href="{{ url_for('logout') }}">{{ navbar["TEACHER"].get("ACCOUNT") }}</a></li>
+                                <li><a href="{{ url_for('logout') }}">{{ navbar["TEACHER"].get("LOGOUT") }}</a></li>
                             </ul>
                             {% endif %}
                         {% else %}
                             <!--not logged in-->
                             <ul class="nav navbar-nav">
-                                <li><a href="{{ url_for('default_page') }}">Home</a></li>
+                                <li><a href="{{ url_for('default_page') }}">{{ navbar.get("HOME") }}</a></li>
                             </ul>
 
                             <ul class="nav navbar-nav navbar-right">
-                                <li><a href="{{ url_for('register') }}">Register</a></li>
-                                <li><a href="{{ url_for('login') }}">Log In</a></li>
+                                <li><a href="{{ url_for('register') }}">{{ navbar.get("REGISTER") }}</a></li>
+                                <li><a href="{{ url_for('login') }}">{{ navbar.get("LOGIN") }}</a></li>
                             </ul>
                         {% endif %}
                     </div>

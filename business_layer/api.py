@@ -1,13 +1,13 @@
 import sys
 from json import dumps
-from flask import redirect, flash, request
+from flask import redirect, flash, request, session
 
 sys.path.append("..")
 
-from data_access.db import (DataBaseHandler, Operation, RelationalOperator)
+from data_access.db import (DataBaseHandler, Operation, RelationalOperator, OrderClause, OrderType)
 from data_access.models import Schedules, ClassSchedules
 from data_access.models.base_models import date, timedelta
-from data_access.views import CourseCalendar, CalendarInfo
+from data_access.views import CourseCalendar, CalendarInfo, MyCourses, Payments
 
 def do_error():
     '''Flashes the desired message and redirects to the desired url'''
@@ -122,3 +122,25 @@ def do_get_calendar(schedule_id : int, month_id : str=None):
 
 def eq_month_year(date1 : date, date2 : date) -> bool:
     return isinstance(date1, date) and isinstance(date2, date) and  date1.month == date2.month and date1.year == date2.year
+
+def do_get_payments():
+    enrolled_schedules = DataBaseHandler().fetch_all(Payments(), "payments_view", 
+        [Operation("user_id", session.get("user_id"), RelationalOperator.EQ, operand_a_col=True)], [])
+    enrolled_schedules.sort(key=lambda day : day.get("pay_to_date"), reverse=True)
+    payments_json = []
+    for payment in enrolled_schedules:
+        match payment.get("paid"):
+            case "TRUE":
+                payment.__vars__["paid"] = "Yes"
+            case _:
+                payment.__vars__["paid"] = "No"
+        payment.__vars__["date_paid"] = "--" if not payment.get("date_paid") or payment.get("date_paid") == date(1, 1, 1) else payment.date_str(payment.get("date_paid"))
+        payment.__vars__["pay_from_date"], payment.__vars__["pay_to_date"] =  map(payment.date_str, 
+            (payment.get("pay_from_date"), payment.get("pay_to_date"))) 
+        
+        payment.__vars__["title"] += f' with {payment.get("first")} {payment.get("last")}'
+        payment.__vars__["amount"] = f'${float(payment.get("amount"))}'
+        del(payment.__vars__["first"])
+        del(payment.__vars__["last"])
+        payments_json.append({field : str(val) for field, val in payment.__vars__.items()})
+    return dumps(payments_json)
