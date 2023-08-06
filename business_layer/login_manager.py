@@ -7,6 +7,8 @@ from passlib.apps import custom_app_context as pwd_context
 # append the path of the parent directory
 sys.path.append("..")
 
+from configs import NAVBAR
+
 from data_access.db import DataBaseHandler, fetch_user
 from data_access.models import User
 
@@ -25,8 +27,7 @@ def student_login_required(f):
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
             return redirect(url_for("login", next=request.url))
-        elif int(session.get("permission_level")) >= 1:
-        # CHANGE: elif str(session.get("role")) == "student":
+        elif str(session.get("role")) == "teacher":
             return redirect(url_for("teacher_classes_view"), next = request.url)
         return f(*args, **kwargs)
     return decorated_function
@@ -41,9 +42,8 @@ def teacher_login_required(f):
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
             return redirect(url_for("login", next=request.url))
-        elif int(session.get("permission_level")) == 0:
-        # CHANGE: elif str(session.get("role")) == "admin":
-            return redirect(url_for("teacher_classes_view"), next = request.url)
+        elif str(session.get("role")) == "student":
+            return redirect(url_for("student_classes_view"), next = request.url)
         return f(*args, **kwargs)
     return decorated_function
 
@@ -84,18 +84,18 @@ def do_login():
             issue_present = True
             
         if issue_present == True:
-            return render_template(login_page, form=form)
+            return render_template(login_page, form=form, navbar=NAVBAR)
 
         # remember which user has logged in
         session["user_id"] = current_user.__vars__["user_id"]
-        session["permission_level"] = current_user.__vars__["role"]
+        session["role"] = current_user.__vars__["role"]
 
         # redirect user to home page
         return redirect(url_for("student_classes_view"))
 
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
-        return render_template(login_page, form=form)
+        return render_template(login_page, form=form, navbar=NAVBAR)
 
 def do_register():
     """Register user."""
@@ -122,7 +122,7 @@ def do_register():
 
         # this makes all the error messages and then sends the user back
         if needs_to_redo_form:
-            return render_template(register_page, form=form)
+            return render_template(register_page, form=form, navbar=NAVBAR)
 
         # add user to database
         new_user = User()
@@ -158,4 +158,4 @@ def do_register():
                 flash("An unknown error has occurred", "danger")
 
         
-        return render_template(register_page, form=form)
+        return render_template(register_page, form=form, navbar=NAVBAR)

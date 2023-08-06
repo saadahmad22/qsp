@@ -1,18 +1,17 @@
-from flask import Flask, flash, redirect, render_template, url_for
-from flask_wtf.csrf import CSRFProtect
-from flask_session import Session
-from passlib.apps import custom_app_context as pwd_context
+from os import urandom as generate_secret_key
 from tempfile import gettempdir
 
-from business_layer.login_manager import do_login, do_logout, do_register, student_login_required
-from business_layer.student_views import do_student_home_page 
-from business_layer.api import do_get_calendar, do_error
+from flask import Flask, flash, redirect, render_template, url_for
+from flask_wtf.csrf import CSRFProtect
+from passlib.apps import custom_app_context as pwd_context
 
-from os import urandom as generate_secret_key
+from configs import NAVBAR
 
-from flask import Flask
-
-
+from business_layer.api import do_error, do_get_calendar, do_get_payments
+from business_layer.login_manager import (do_login, do_logout, do_register,
+                                          student_login_required)
+from business_layer.student_views import do_payments, do_student_home_page
+from flask_session import Session
 
 # create and configure the app/jinja environment
 app = Flask(__name__, template_folder="./business_layer/templates")
@@ -34,7 +33,7 @@ def default_page():
 
 @app.route("/home")
 def home_page():
-    return render_template("index.html")
+    return render_template("index.html", navbar=NAVBAR)
 
 #-----------------------Login pages-----------------------
 @app.route("/login", methods=["GET", "POST"])
@@ -51,11 +50,14 @@ def register():
 
 #-----------------------Student pages-----------------------
 @student_login_required
-@app.route("/student/home", methods=["GET", "POST"])
+@app.route("/student/home")
 def student_classes_view():
-    '''TODO'''
-
     return do_student_home_page()
+
+@student_login_required
+@app.route("/student/payments")
+def student_payments():
+    return do_payments()
 
 #-----------------------Teacher pages-----------------------
 @app.route("/teacher/home")
@@ -77,6 +79,11 @@ def get_calendar_via_month(schedule_id, month_id):
 @app.route("/api/error", methods=["POST"])
 def error_():
     return do_error()
+
+@app.route("/api/payments")
+def get_payments():
+    return do_get_payments()
+
 
 #-----------------------Launch the app-----------------------
 if __name__ == "__main__":

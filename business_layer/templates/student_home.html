@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Overview
+    Dashboard
 {% endblock %}
 
 {% block main %}
@@ -9,12 +9,14 @@
     {% if num_schedules <= 0 %}
         <h3 class="text-center text-danger">No enrolled classes.</h3>
         <h4><a href="{{url_for('logout')}}">Please register here.</a></h4>
-    {% elif num_schedules > 1  %}
+    {% else %}
     <div class="container">
         <div class="row justify-content-center">
             <div class="d-flex justify-content-between">
                 <form action="{{url_for('student_classes_view')}}" method="POST">  
                     {{ form.csrf_token }}
+                    {{ form.selected_class.label }}
+                    {# (style="max-width:20%", class_="form-select form-control") #}
                     {{ form.selected_class(style="max-width:20%", class_="form-select form-control") }}
                 </form>
             </div>
@@ -45,6 +47,18 @@
                 new_month();
             }
         } );
+
+        $(document).ready(() => {
+            const selected_class = $("#selected_class").val()
+            const class_cookie = get_class_data_from_cookie(selected_class)
+            if (class_cookie && class_cookie != "undefined") {
+                new_month(class_cookie);
+            }
+            else {
+                new_month();
+            }
+        }) 
+
         var calendar_json = null;
 
         function fetch_cal(month_id) {

@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Payments
+{% endblock %}
+
+{% block main %}
+<link href="{{ url_for('static', filename='/libs/bootstrap-table.min.css') }}" rel="stylesheet">
+<script src="{{ url_for('static', filename='/libs/bootstrap-table.min.js') }}"></script>
+{# 
+  css: https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css 
+  js :  https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js
+  source: https://examples.bootstrap-table.com/index.html#welcomes/flat-json.html#view-source
+#}
+
+<table
+  id="table"
+  data-toggle="table"
+  data-flat="true"
+  data-search="true"
+  data-height="460"
+  data-pagination="true"
+  data-page-size="25"
+  data-pagination-pre-text="Previous"
+  data-pagination-next-text="Next"
+  data-row-style="check_paid"
+  data-url="{{ url_for('get_payments') }}">
+
+  <thead>
+    <tr>
+      <th data-field="title" data-sortable="true">Class</th>
+      <th data-field="amount" data-sortable="true">Amount</th>
+      <th data-field="paid" data-sortable="true">Paid</th>
+      <th data-field="date_paid" data-sortable="true" data-sorter="date_sorter">Date Paid</th>
+      <th data-field="pay_from_date" data-sortable="true" data-sorter="date_sorter">Pays From</th>
+      <th data-field="pay_to_date" data-sortable="true" data-sorter="date_sorter">Pays To</th>
+    </tr>
+  </thead>
+</table>
+{% endblock %}
