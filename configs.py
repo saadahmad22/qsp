@@ -1,5 +1,5 @@
 DB_CONFIGS = {
-    "DB_LOC" : "./testDB.db",
+    "DB_LOC" : "./dataDB.db",
     "SHOW_SQL" : False,
     "SHOW_MODEL" : True
 }
